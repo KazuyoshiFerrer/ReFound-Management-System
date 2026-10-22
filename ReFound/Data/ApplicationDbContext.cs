@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using ReFound.Models;
 
@@ -12,4 +11,6 @@ public class ApplicationDbContext : DbContext
     }
 
     public DbSet<FoundItem> FoundItems { get; set; } = null!;
+}
+    public DbSet<ClaimRequest> ClaimRequests { get; set; } = null!;
 }

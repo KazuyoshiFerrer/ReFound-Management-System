@@ -18,6 +18,7 @@ namespace ReFound.Migrations
             modelBuilder.HasAnnotation("ProductVersion", "10.0.13");
 
             modelBuilder.Entity("ReFound.Models.FoundItem", b =>
+            modelBuilder.Entity("ReFound.Models.ClaimRequest", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -44,6 +45,17 @@ namespace ReFound.Migrations
                     b.Property<string>("LocationFound")
                         .IsRequired()
                         .HasMaxLength(150)
+                    b.Property<DateTime>("ClaimDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ClaimantUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FoundItemId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ProofOfOwnership")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Status")
@@ -53,6 +65,7 @@ namespace ReFound.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("FoundItems");
+                    b.ToTable("ClaimRequests");
                 });
 #pragma warning restore 612, 618
         }
