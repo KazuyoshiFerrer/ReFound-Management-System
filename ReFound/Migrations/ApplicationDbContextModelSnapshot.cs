@@ -56,7 +56,7 @@ namespace ReFound.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("DateFound")
+                    b.Property<DateTime?>("DateFound")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
