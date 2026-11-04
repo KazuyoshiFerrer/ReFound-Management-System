@@ -17,6 +17,49 @@ namespace ReFound.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.13");
 
+            modelBuilder.Entity("ReFound.Models.ClaimRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ClaimDescription")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ContactNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("FoundItemId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("RequestDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StudentID")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StudentName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FoundItemId");
+
+                    b.ToTable("ClaimRequests");
+                });
+
             modelBuilder.Entity("ReFound.Models.FoundItem", b =>
             modelBuilder.Entity("ReFound.Models.ClaimRequest", b =>
                 {
@@ -66,6 +109,17 @@ namespace ReFound.Migrations
 
                     b.ToTable("FoundItems");
                     b.ToTable("ClaimRequests");
+                });
+
+            modelBuilder.Entity("ReFound.Models.ClaimRequest", b =>
+                {
+                    b.HasOne("ReFound.Models.FoundItem", "FoundItem")
+                        .WithMany()
+                        .HasForeignKey("FoundItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FoundItem");
                 });
 #pragma warning restore 612, 618
         }

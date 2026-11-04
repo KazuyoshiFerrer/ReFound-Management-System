@@ -1,51 +1,77 @@
+
 @model ReFound.Models.ClaimRequest
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Claim Request";
 }
 
-<h1>Edit</h1>
+<h1>Edit Claim Request</h1>
 
-<h4>ClaimRequest</h4>
 <hr />
+
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="col-md-6">
+        <form asp-action="Edit" method="post">
             <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="FoundItemId" class="control-label"></label>
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="FoundItemId" class="control-label">Found Item ID</label>
                 <input asp-for="FoundItemId" class="form-control" />
                 <span asp-validation-for="FoundItemId" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="ClaimantUserId" class="control-label"></label>
-                <input asp-for="ClaimantUserId" class="form-control" />
-                <span asp-validation-for="ClaimantUserId" class="text-danger"></span>
+
+            <div class="form-group mb-3">
+                <label asp-for="StudentName" class="control-label"></label>
+                <input asp-for="StudentName" class="form-control" />
+                <span asp-validation-for="StudentName" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="ClaimDate" class="control-label"></label>
-                <input asp-for="ClaimDate" class="form-control" />
-                <span asp-validation-for="ClaimDate" class="text-danger"></span>
+
+            <div class="form-group mb-3">
+                <label asp-for="StudentID" class="control-label"></label>
+                <input asp-for="StudentID" class="form-control" />
+                <span asp-validation-for="StudentID" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="ProofOfOwnership" class="control-label"></label>
-                <input asp-for="ProofOfOwnership" class="form-control" />
-                <span asp-validation-for="ProofOfOwnership" class="text-danger"></span>
+
+            <div class="form-group mb-3">
+                <label asp-for="ContactNumber" class="control-label"></label>
+                <input asp-for="ContactNumber" class="form-control" />
+                <span asp-validation-for="ContactNumber" class="text-danger"></span>
             </div>
-            <div class="form-group">
+
+            <div class="form-group mb-3">
+                <label asp-for="ClaimDescription" class="control-label"></label>
+                <textarea asp-for="ClaimDescription" class="form-control"></textarea>
+                <span asp-validation-for="ClaimDescription" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="RequestDate" class="control-label"></label>
+                <input asp-for="RequestDate" type="date" class="form-control" />
+                <span asp-validation-for="RequestDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
                 <label asp-for="Status" class="control-label"></label>
-                <input asp-for="Status" class="form-control" />
+                <select asp-for="Status" class="form-control">
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
                 <span asp-validation-for="Status" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
