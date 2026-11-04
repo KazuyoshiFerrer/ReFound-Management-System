@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -19,49 +15,84 @@ namespace ReFound.Controllers
             _context = context;
         }
 
+        // Populate Found Item dropdown
+        private async Task PopulateFoundItemsAsync(int? selectedId = null)
+        {
+            var foundItems = await _context.FoundItems
+                .OrderBy(f => f.ItemName)
+                .ToListAsync();
+
+            ViewBag.FoundItems = foundItems.Select(f => new SelectListItem
+            {
+                Value = f.Id.ToString(),
+                Text = $"ID: {f.Id} - {f.ItemName}",
+                Selected = f.Id == selectedId
+            }).ToList();
+        }
+
         // GET: ClaimRequests
         public async Task<IActionResult> Index()
         {
-            return View(await _context.ClaimRequests.ToListAsync());
+            var claimRequests = await _context.ClaimRequests
+                .Include(c => c.FoundItem)
+                .ToListAsync();
+
+            return View(claimRequests);
         }
 
         // GET: ClaimRequests/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var claimRequest = await _context.ClaimRequests
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Include(c => c.FoundItem)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
             if (claimRequest == null)
-            {
                 return NotFound();
-            }
 
             return View(claimRequest);
         }
 
         // GET: ClaimRequests/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            await PopulateFoundItemsAsync();
             return View();
         }
 
         // POST: ClaimRequests/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FoundItemId,ClaimantUserId,ClaimDate,ProofOfOwnership,Status")] ClaimRequest claimRequest)
+        public async Task<IActionResult> Create(ClaimRequest claimRequest)
         {
+            var foundItemExists = await _context.FoundItems
+                .AnyAsync(f => f.Id == claimRequest.FoundItemId);
+
+            if (!foundItemExists)
+            {
+                ModelState.AddModelError(
+                    "FoundItemId",
+                    "Please select a valid found item."
+                );
+            }
+
             if (ModelState.IsValid)
             {
-                _context.Add(claimRequest);
+                claimRequest.Status = "Pending";
+                claimRequest.RequestDate = DateTime.Today;
+                claimRequest.FoundItem = null;
+
+                _context.ClaimRequests.Add(claimRequest);
+
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
+
+            await PopulateFoundItemsAsync(claimRequest.FoundItemId);
             return View(claimRequest);
         }
 
@@ -69,50 +100,54 @@ namespace ReFound.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var claimRequest = await _context.ClaimRequests.FindAsync(id);
+
             if (claimRequest == null)
-            {
                 return NotFound();
-            }
+
             return View(claimRequest);
         }
 
         // POST: ClaimRequests/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FoundItemId,ClaimantUserId,ClaimDate,ProofOfOwnership,Status")] ClaimRequest claimRequest)
+        public async Task<IActionResult> Edit(int id, ClaimRequest claimRequest)
         {
             if (id != claimRequest.Id)
-            {
                 return NotFound();
+
+            var foundItemExists = await _context.FoundItems
+                .AnyAsync(f => f.Id == claimRequest.FoundItemId);
+
+            if (!foundItemExists)
+            {
+                ModelState.AddModelError(
+                    "FoundItemId",
+                    "Please select a valid found item."
+                );
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
+                    claimRequest.FoundItem = null;
                     _context.Update(claimRequest);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ClaimRequestExists(claimRequest.Id))
-                    {
+                    if (!_context.ClaimRequests.Any(e => e.Id == id))
                         return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+
+                    throw;
                 }
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View(claimRequest);
         }
 
@@ -120,16 +155,14 @@ namespace ReFound.Controllers
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var claimRequest = await _context.ClaimRequests
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Include(c => c.FoundItem)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
             if (claimRequest == null)
-            {
                 return NotFound();
-            }
 
             return View(claimRequest);
         }
@@ -140,18 +173,14 @@ namespace ReFound.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var claimRequest = await _context.ClaimRequests.FindAsync(id);
+
             if (claimRequest != null)
             {
                 _context.ClaimRequests.Remove(claimRequest);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool ClaimRequestExists(int id)
-        {
-            return _context.ClaimRequests.Any(e => e.Id == id);
         }
     }
 }

@@ -1,48 +1,46 @@
+
 @model ReFound.Models.ClaimRequest
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Claim Request Details";
 }
 
-<h1>Details</h1>
+<h1>Claim Request Details</h1>
 
 <div>
-    <h4>ClaimRequest</h4>
     <hr />
+
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FoundItemId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FoundItemId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ClaimantUserId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ClaimantUserId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ClaimDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ClaimDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProofOfOwnership)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProofOfOwnership)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
+        <dt class="col-sm-3">Claim Request ID</dt>
+        <dd class="col-sm-9">@Model.Id</dd>
+
+        <dt class="col-sm-3">Found Item ID</dt>
+        <dd class="col-sm-9">@Model.FoundItemId</dd>
+
+        <dt class="col-sm-3">Item Name</dt>
+        <dd class="col-sm-9">@(Model.FoundItem?.ItemName ?? "Unknown Item")</dd>
+
+        <dt class="col-sm-3">Student Name</dt>
+        <dd class="col-sm-9">@Model.StudentName</dd>
+
+        <dt class="col-sm-3">Student ID</dt>
+        <dd class="col-sm-9">@Model.StudentID</dd>
+
+        <dt class="col-sm-3">Contact Number</dt>
+        <dd class="col-sm-9">@Model.ContactNumber</dd>
+
+        <dt class="col-sm-3">Claim Description</dt>
+        <dd class="col-sm-9">@Model.ClaimDescription</dd>
+
+        <dt class="col-sm-3">Request Date</dt>
+        <dd class="col-sm-9">@Model.RequestDate.ToShortDateString()</dd>
+
+        <dt class="col-sm-3">Status</dt>
+        <dd class="col-sm-9">@Model.Status</dd>
     </dl>
 </div>
+
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
 </div>

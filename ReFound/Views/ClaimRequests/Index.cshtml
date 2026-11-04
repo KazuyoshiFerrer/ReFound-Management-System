@@ -1,59 +1,47 @@
+
 @model IEnumerable<ReFound.Models.ClaimRequest>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Claim Requests";
 }
 
-<h1>Index</h1>
+<h1>Claim Requests</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Create New Claim Request</a>
 </p>
-<table class="table">
+
+<table class="table table-striped table-hover">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.FoundItemId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ClaimantUserId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ClaimDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ProofOfOwnership)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th></th>
+            <th>Claim Request ID</th>
+            <th>Found Item ID</th>
+            <th>Item Name</th>
+            <th>Student Name</th>
+            <th>Student ID</th>
+            <th>Request Date</th>
+            <th>Status</th>
+            <th>Actions</th>
         </tr>
     </thead>
+
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.FoundItemId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ClaimantUserId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ClaimDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProofOfOwnership)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.FoundItemId</td>
+                <td>@(item.FoundItem?.ItemName ?? "Unknown Item")</td>
+                <td>@item.StudentName</td>
+                <td>@item.StudentID</td>
+                <td>@item.RequestDate.ToShortDateString()</td>
+                <td>@item.Status</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
