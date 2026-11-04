@@ -7,11 +7,13 @@ namespace ReFound.Validation
     {
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
-            if (value is DateTime date && date.Date > DateTime.Today)
+            if (value is DateTime dateValue)
             {
-                return new ValidationResult(ErrorMessage ?? "The date can't be in the future.");
+                if (dateValue > DateTime.Now)
+                {
+                    return new ValidationResult(ErrorMessage ?? "Date cannot be in the future.");
+                }
             }
-
             return ValidationResult.Success;
         }
     }
