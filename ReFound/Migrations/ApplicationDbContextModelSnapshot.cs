@@ -26,7 +26,7 @@ namespace ReFound.Migrations
                     b.Property<DateTime>("ClaimDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ClaimantUserId")
+                    b.Property<int?>("ClaimantUserId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("FoundItemId")
@@ -34,6 +34,7 @@ namespace ReFound.Migrations
 
                     b.Property<string>("ProofOfOwnership")
                         .IsRequired()
+                        .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Status")
@@ -91,6 +92,7 @@ namespace ReFound.Migrations
 
                     b.Property<string>("ContactInfo")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("DateLost")
@@ -98,10 +100,12 @@ namespace ReFound.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
+                        .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Location")
                         .IsRequired()
+                        .HasMaxLength(150)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Status")
