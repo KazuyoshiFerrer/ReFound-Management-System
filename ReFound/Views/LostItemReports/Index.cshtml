@@ -9,6 +9,11 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
+<!-- Live Search input box right above the table -->
+<input type="text" id="searchBox" class="form-control mb-3"
+       placeholder="Live search - Aryan" />
+
 <table class="table">
     <thead>
         <tr>
@@ -33,7 +38,7 @@
             <th></th>
         </tr>
     </thead>
-    <tbody>
+    <tbody id="reportRows">
 @foreach (var item in Model) {
         <tr>
             <td>
@@ -63,3 +68,20 @@
 }
     </tbody>
 </table>
+
+@section Scripts {
+<script>
+    document.getElementById("searchBox").addEventListener("input", function () {
+        const text = this.value.toLowerCase();
+
+        document.querySelectorAll("#reportRows tr").forEach(function (row) {
+            // Checks Title (cell 0), Description (cell 1), and Location (cell 2)
+            const rowText = (row.cells[0].textContent + " " +
+                             row.cells[1].textContent + " " +
+                             row.cells[2].textContent).toLowerCase();
+
+            row.style.display = rowText.includes(text) ? "" : "none";
+        });
+    });
+</script>
+}
