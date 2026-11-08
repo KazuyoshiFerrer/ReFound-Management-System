@@ -1,14 +1,19 @@
 @model IEnumerable<ReFound.Models.ClaimRequest>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Claim Requests Index";
 }
 
-<h1>Index</h1>
+<h1>Claim Requests</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
 </p>
+
+<!-- Live Search Input Box -->
+<input type="text" id="claimSearchBox" class="form-control mb-3"
+       placeholder="Live search claims by Item ID, User ID, proof, or status - Kazuyoshi" />
+
 <table class="table">
     <thead>
         <tr>
@@ -30,7 +35,8 @@
             <th></th>
         </tr>
     </thead>
-    <tbody>
+    <!-- Added id="claimRows" to target table rows -->
+    <tbody id="claimRows">
 @foreach (var item in Model) {
         <tr>
             <td>
@@ -57,3 +63,22 @@
 }
     </tbody>
 </table>
+
+<!-- Client-Side Live Search Script -->
+@section Scripts {
+<script>
+    document.getElementById("claimSearchBox").addEventListener("input", function () {
+        const text = this.value.toLowerCase();
+
+        document.querySelectorAll("#claimRows tr").forEach(function (row) {
+            // Checks FoundItemId (cell 0), ClaimantUserId (cell 1), ProofOfOwnership (cell 3), and Status (cell 4)
+            const rowText = (row.cells[0].textContent + " " +
+                             row.cells[1].textContent + " " +
+                             row.cells[3].textContent + " " +
+                             row.cells[4].textContent).toLowerCase();
+
+            row.style.display = rowText.includes(text) ? "" : "none";
+        });
+    });
+</script>
+}
