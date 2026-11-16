@@ -1,54 +1,63 @@
 @model ReFound.Models.FoundItem
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Found Item Details";
 }
 
-<h1>Details</h1>
+<h1>Found Item Details</h1>
+<hr />
 
-<div>
-    <h4>FoundItem</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ItemName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ItemName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Category)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Category)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateFound)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateFound)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LocationFound)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LocationFound)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-    </dl>
+<div class="row">
+    <div class="col-md-7">
+        <dl class="row">
+            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.ItemName)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.ItemName)</dd>
+
+            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Description)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.Description)</dd>
+
+            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Category)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.Category)</dd>
+
+            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.DateFound)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.DateFound)</dd>
+
+            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.LocationFound)</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.LocationFound)</dd>
+
+            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Status)</dt>
+            <dd class="col-sm-8">
+                @if (Model.Status == "Claimed")
+                {
+                    <span class="badge bg-success">Claimed</span>
+                }
+                else
+                {
+                    <span class="badge bg-warning text-dark">@Model.Status</span>
+                }
+            </dd>
+        </dl>
+    </div>
+
+    <div class="col-md-5">
+        @if (!string.IsNullOrEmpty(Model.ImagePath))
+        {
+            <div class="card">
+                <img src="@Model.ImagePath" alt="@Model.ItemName" class="card-img-top img-fluid" />
+                <div class="card-footer text-muted small">Attached Item Photo</div>
+            </div>
+        }
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<div class="mt-3">
+    @if (User.Identity != null && User.Identity.IsAuthenticated && !User.IsInRole("Admin") && Model.Status == "Unclaimed")
+    {
+        <a asp-controller="ClaimRequests" asp-action="Create" asp-route-foundItemId="@Model.Id" class="btn btn-success me-2">Claim This Item</a>
+    }
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning me-2">Edit</a>
+    }
+    <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
 </div>

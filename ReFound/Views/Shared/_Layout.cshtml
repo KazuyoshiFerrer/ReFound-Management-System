@@ -1,104 +1,117 @@
 ﻿<!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ReFound</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <!-- ADDED BOOTSTRAP ICONS FOR SUN/MOON -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/ReFound.styles.css" asp-append-version="true" />
-</head>
-<body>
-    <header>
-        <!-- UPDATED NAVBAR: Changed `navbar-light bg-white` to responsive classes -->
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ReFound</a>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>@ViewData["Title"] - ReFound</title>
+		<script type="importmap"></script>
+		<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+		<!-- ADDED BOOTSTRAP ICONS FOR SUN/MOON -->
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+		<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+		<link rel="stylesheet" href="~/ReFound.styles.css" asp-append-version="true" />
+	</head>
+	<body>
+		<header>
+			<!-- UPDATED NAVBAR: Changed `navbar-light bg-white` to responsive classes -->
+			<nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3">
+				<div class="container-fluid">
+					<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ReFound</a>
+					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+							aria-expanded="false" aria-label="Toggle navigation">
+						<span class="navbar-toggler-icon"></span>
+					</button>
+					<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+						<ul class="navbar-nav flex-grow-1">
+							<li class="nav-item">
+								<a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" asp-area="" asp-controller="FoundItems" asp-action="Index">Found Items</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" asp-area="" asp-controller="LostItemReports" asp-action="Index">Lost Item Reports</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" asp-area="" asp-controller="ClaimRequests" asp-action="Index">Claim Requests</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+							</li>
+						</ul>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+						<div class="d-flex align-items-center gap-2 ms-auto">
+							@if (User.Identity != null && User.Identity.IsAuthenticated)
+							{
+							<span class="navbar-text me-2">
+								Hello, <strong>@User.Identity.Name</strong>
+							</span>
+							<form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+								<button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
+							</form>
+							}
+							else
+							{
+							<a class="btn btn-outline-primary btn-sm" asp-controller="Account" asp-action="Login">Login</a>
+							<a class="btn btn-primary btn-sm" asp-controller="Account" asp-action="Register">Register</a>
+							}
 
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="FoundItems" asp-action="Index">Found Items</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="LostItemReports" asp-action="Index">Lost Item Reports</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="ClaimRequests" asp-action="Index">Claim Requests</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+							<!-- ADDED DARK MODE TOGGLE BUTTON HERE -->
+							<button class="btn btn-outline-secondary btn-sm" id="themeToggleBtn" type="button" onclick="toggleDarkMode()">
+								<i id="themeIcon" class="bi bi-sun-fill"></i>
+								<span id="themeText">Light Mode</span>
+							</button>
+						</div>
+					</div>
+				</div>
+			</nav>
+		</header>
+		<div class="container">
+			<main role="main" class="pb-3">
+				@RenderBody()
+			</main>
+		</div>
 
-                    <!-- ADDED DARK MODE TOGGLE BUTTON HERE -->
-                    <button class="btn btn-outline-secondary ms-auto" id="themeToggleBtn" type="button" onclick="toggleDarkMode()">
-                        <i id="themeIcon" class="bi bi-sun-fill"></i> <span id="themeText">Light Mode</span>
-                    </button>
-                </div>
-            </div>
-        </nav>
-    </header>
+		<footer class="border-top footer text-muted">
+			<div class="container">
+				&copy; 2026 - ReFound - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+			</div>
+		</footer>
+		<script src="~/lib/jquery/dist/jquery.min.js"></script>
+		<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+		<script src="~/js/site.js" asp-append-version="true"></script>
+		<!-- ADDED PERSISTENT THEME SWITCH SCRIPT HERE -->
+		<script>
+			function applyTheme(theme) {
+			document.documentElement.setAttribute('data-bs-theme', theme);
+			localStorage.setItem('refound-theme', theme);
 
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+			const icon = document.getElementById('themeIcon');
+			const text = document.getElementById('themeText');
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - ReFound - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+			if (icon && text) {
+			if (theme === 'dark') {
+			icon.className = 'bi bi-sun-fill';
+			text.textContent = 'Light Mode';
+			} else {
+			icon.className = 'bi bi-moon-fill';
+			text.textContent = 'Dark Mode';
+			}
+			}
+			}
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+			function toggleDarkMode() {
+			const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+			const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+			applyTheme(newTheme);
+			}
 
-    <!-- ADDED PERSISTENT THEME SWITCH SCRIPT HERE -->
-    <script>
-        function applyTheme(theme) {
-            document.documentElement.setAttribute('data-bs-theme', theme);
-            localStorage.setItem('refound-theme', theme);
+			(function () {
+			const savedTheme = localStorage.getItem('refound-theme') || 'dark';
+			applyTheme(savedTheme);
+			})();
+		</script>
 
-            const icon = document.getElementById('themeIcon');
-            const text = document.getElementById('themeText');
-
-            if (icon && text) {
-                if (theme === 'dark') {
-                    icon.className = 'bi bi-sun-fill';
-                    text.textContent = 'Light Mode';
-                } else {
-                    icon.className = 'bi bi-moon-fill';
-                    text.textContent = 'Dark Mode';
-                }
-            }
-        }
-
-        function toggleDarkMode() {
-            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            applyTheme(newTheme);
-        }
-
-        (function () {
-            const savedTheme = localStorage.getItem('refound-theme') || 'dark';
-            applyTheme(savedTheme);
-        })();
-    </script>
-
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
+		@await RenderSectionAsync("Scripts", required: false)
+	</body>
 </html>

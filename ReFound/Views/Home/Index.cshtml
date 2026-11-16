@@ -1,8 +1,118 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<ReFound.Models.FoundItem>
+
+@{
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Hero / Welcome Banner -->
+<div class="p-4 p-md-5 mb-4 rounded-3 border bg-body-tertiary">
+    <div class="container-fluid py-2">
+        <h1 class="display-6 fw-bold">ReFound Campus Lost &amp; Found</h1>
+        <p class="col-md-8 fs-5 text-body-secondary">
+            Browse items turned in around campus, use AI-powered search to locate lost belongings, or submit a lost item report.
+        </p>
+        <div class="d-flex flex-wrap gap-2 mt-3">
+            <a asp-controller="FoundItems" asp-action="Index" class="btn btn-primary btn-lg">
+                <i class="bi bi-search"></i> Browse Found Items
+            </a>
+            <a asp-controller="LostItemReports" asp-action="Create" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-megaphone"></i> Report a Lost Item
+            </a>
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-controller="FoundItems" asp-action="Create" class="btn btn-success btn-lg">
+                    <i class="bi bi-plus-circle"></i> Log Found Item
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- 4 Live Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100 border-primary">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-body-secondary">Total Found Items</h6>
+                <h2 class="card-title display-6 fw-bold text-primary">@ViewBag.TotalFound</h2>
+                <a asp-controller="FoundItems" asp-action="Index" class="card-link small">View all &rarr;</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100 border-warning">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-body-secondary">Unclaimed Items</h6>
+                <h2 class="card-title display-6 fw-bold text-warning">@ViewBag.UnclaimedCount</h2>
+                <a asp-controller="FoundItems" asp-action="Index" class="card-link small">Ready for claim &rarr;</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100 border-info">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-body-secondary">Lost Item Reports</h6>
+                <h2 class="card-title display-6 fw-bold text-info">@ViewBag.LostReportsCount</h2>
+                <a asp-controller="LostItemReports" asp-action="Index" class="card-link small">Check reports &rarr;</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100 border-success">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-body-secondary">Claim Requests</h6>
+                <h2 class="card-title display-6 fw-bold text-success">@ViewBag.ClaimRequestsCount</h2>
+                <a asp-controller="ClaimRequests" asp-action="Index" class="card-link small">View requests &rarr;</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Unclaimed Items Table -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Recently Found (Unclaimed)</h5>
+        <a asp-controller="FoundItems" asp-action="Index" class="btn btn-sm btn-outline-primary">See All</a>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <p class="p-4 mb-0 text-body-secondary">No unclaimed items at the moment.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Category</th>
+                            <th>Location Found</th>
+                            <th>Date Found</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@item.ItemName</td>
+                                <td>@item.Category</td>
+                                <td>@item.LocationFound</td>
+                                <td>@item.DateFound.ToShortDateString()</td>
+                                <td><span class="badge bg-warning text-dark">@item.Status</span></td>
+                                <td class="text-end">
+                                    <a asp-controller="FoundItems" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Details</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
 </div>
