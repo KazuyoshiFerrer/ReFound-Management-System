@@ -65,6 +65,9 @@ namespace ReFound.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ItemName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -103,6 +106,9 @@ namespace ReFound.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -120,6 +126,34 @@ namespace ReFound.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("LostItemReports");
+                });
+
+            modelBuilder.Entity("ReFound.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
                 });
 #pragma warning restore 612, 618
         }

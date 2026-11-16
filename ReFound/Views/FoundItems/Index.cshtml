@@ -1,70 +1,85 @@
 @model IEnumerable<ReFound.Models.FoundItem>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Found Items";
 }
 
 <h1>Found Items</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Create New</a>
-</p>
+@if (User.IsInRole("Admin"))
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Create New</a>
+    </p>
+}
 
 <!-- Live AI Search Input Box -->
 <div class="mb-3">
     <input type="text" id="foundSearchBox" class="form-control"
-           placeholder="Live AI search (e.g., 'black hydroflask near gym', 'apple laptop charger')..." />
+           placeholder="Live AI search (e.g., 'blue tumbler in gym', 'apple laptop charger')..." />
+    <div id="aiSearchStatus" class="form-text text-info d-none mt-1">
+        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+        AI is ranking matching items...
+    </div>
 </div>
 
-<table class="table">
+<table class="table table-hover align-middle">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.ItemName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DateFound)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LocationFound)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th></th>
+            <th>Photo</th>
+            <th>@Html.DisplayNameFor(model => model.ItemName)</th>
+            <th>@Html.DisplayNameFor(model => model.Description)</th>
+            <th>@Html.DisplayNameFor(model => model.Category)</th>
+            <th>@Html.DisplayNameFor(model => model.DateFound)</th>
+            <th>@Html.DisplayNameFor(model => model.LocationFound)</th>
+            <th>@Html.DisplayNameFor(model => model.Status)</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody id="foundItemRows">
 @foreach (var item in Model) {
         <tr class="searchable-row" data-item-id="@item.Id">
             <td>
-                @Html.DisplayFor(modelItem => item.ItemName)
+                @if (!string.IsNullOrEmpty(item.ImagePath))
+                {
+                    <img src="@item.ImagePath" alt="@item.ItemName" style="width: 60px; height: 60px; object-fit: cover;" class="rounded border" />
+                }
+                else
+                {
+                    <span class="text-muted small">No photo</span>
+                }
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Description)
+                <span class="item-title">@Html.DisplayFor(modelItem => item.ItemName)</span>
+                <span class="match-badge badge bg-info text-dark ms-2 d-none">Best Match</span>
+            </td>
+            <td>@Html.DisplayFor(modelItem => item.Description)</td>
+            <td>@Html.DisplayFor(modelItem => item.Category)</td>
+            <td>@Html.DisplayFor(modelItem => item.DateFound)</td>
+            <td>@Html.DisplayFor(modelItem => item.LocationFound)</td>
+            <td>
+                @if (item.Status == "Claimed")
+                {
+                    <span class="badge bg-success">Claimed</span>
+                }
+                else
+                {
+                    <span class="badge bg-warning text-dark">@item.Status</span>
+                }
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Category)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DateFound)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LocationFound)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Details</a>
+
+                @if (User.Identity != null && User.Identity.IsAuthenticated && !User.IsInRole("Admin") && item.Status == "Unclaimed")
+                {
+                    <a asp-controller="ClaimRequests" asp-action="Create" asp-route-foundItemId="@item.Id" class="btn btn-sm btn-success">Claim</a>
+                }
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                }
             </td>
         </tr>
 }
@@ -75,38 +90,75 @@
 <script>
     let searchTimeout;
     const searchInput = document.getElementById("foundSearchBox");
-    const rows = document.querySelectorAll("#foundItemRows tr");
+    const searchStatus = document.getElementById("aiSearchStatus");
+    const tbody = document.getElementById("foundItemRows");
+    const originalRows = Array.from(tbody.querySelectorAll("tr"));
+
+    function resetRows() {
+        originalRows.forEach(row => {
+            row.classList.remove("opacity-50");
+            const badge = row.querySelector(".match-badge");
+            if (badge) badge.classList.add("d-none");
+            tbody.appendChild(row);
+        });
+    }
 
     searchInput.addEventListener("input", function () {
         clearTimeout(searchTimeout);
         const query = this.value.trim();
 
         if (!query) {
-            rows.forEach(row => row.style.display = "");
+            searchStatus.classList.add("d-none");
+            resetRows();
             return;
         }
 
         searchTimeout = setTimeout(async () => {
+            searchStatus.classList.remove("d-none");
             try {
-                console.log("1. Sending query:", query);
                 const res = await fetch(`/FoundItems/SmartSearch?query=${encodeURIComponent(query)}`);
-                console.log("2. Response status:", res.status);
-
                 if (!res.ok) {
                     const errText = await res.text();
                     console.error("Server error:", errText);
                     return;
                 }
 
-                const matchingIds = await res.json();
-                console.log("3. Matching IDs:", matchingIds);
+                const rankedIds = await res.json();
+                const matchedSet = new Set(rankedIds);
 
-                rows.forEach(row => {
+                originalRows.forEach(row => {
+                    row.classList.remove("opacity-50");
+                    const badge = row.querySelector(".match-badge");
+                    if (badge) badge.classList.add("d-none");
+                });
+
+                rankedIds.forEach((id, index) => {
+                    const row = originalRows.find(r => parseInt(r.getAttribute("data-item-id")) === id);
+                    if (row) {
+                        const badge = row.querySelector(".match-badge");
+                        if (badge) {
+                            badge.textContent = index === 0 ? "Best Match" : "Match";
+                            badge.className = index === 0
+                                ? "match-badge badge bg-info text-dark ms-2"
+                                : "match-badge badge bg-secondary ms-2";
+                        }
+                        tbody.appendChild(row);
+                    }
+                });
+
+                originalRows.forEach(row => {
                     const id = parseInt(row.getAttribute("data-item-id"));
-                    row.style.display = matchingIds.includes(id) ? "" : "none";
+                    if (!matchedSet.has(id)) {
+                        if (rankedIds.length > 0) {
+                            row.classList.add("opacity-50");
+                        }
+                        tbody.appendChild(row);
+                    }
                 });
             } catch (err) {
                 console.error("Smart search failed:", err);
+            } finally {
+                searchStatus.classList.add("d-none");
             }
         }, 500);
     });

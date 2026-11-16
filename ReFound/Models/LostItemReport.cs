@@ -34,5 +34,8 @@ namespace ReFound.Models
         public string ContactInfo { get; set; } = string.Empty;
 
         public string Status { get; set; } = "Pending";
+
+        [Display(Name = "Item Photo")]
+        public string? ImagePath { get; set; }
     }
 }

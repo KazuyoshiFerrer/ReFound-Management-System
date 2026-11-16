@@ -8,6 +8,7 @@ public class FoundItem
 
     [Required]
     [StringLength(100)]
+    [Display(Name = "Item Name")]
     public string ItemName { get; set; } = "";
 
     [Required]
@@ -19,12 +20,17 @@ public class FoundItem
     public string Category { get; set; } = "";
 
     [DataType(DataType.Date)]
+    [Display(Name = "Date Found")]
     public DateTime DateFound { get; set; } = DateTime.Today;
 
     [Required]
     [StringLength(150)]
+    [Display(Name = "Location Found")]
     public string LocationFound { get; set; } = "";
 
     [Required]
-    public string Status { get; set; } = "Found";
+    public string Status { get; set; } = "Unclaimed";
+
+    [Display(Name = "Item Photo")]
+    public string? ImagePath { get; set; }
 }

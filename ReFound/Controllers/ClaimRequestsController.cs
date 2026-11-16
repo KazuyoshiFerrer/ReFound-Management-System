@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -43,29 +45,53 @@ namespace ReFound.Controllers
             return View(claimRequest);
         }
 
-        // GET: ClaimRequests/Create
-        public IActionResult Create()
+        // GET: ClaimRequests/Create?foundItemId=2
+        [Authorize]
+        public async Task<IActionResult> Create(int? foundItemId)
         {
-            return View();
+            await PopulateFoundItemsDropDown(foundItemId);
+
+            var model = new ClaimRequest
+            {
+                FoundItemId = foundItemId,
+                ClaimDate = DateTime.Now
+            };
+
+            return View(model);
         }
 
         // POST: ClaimRequests/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FoundItemId,ClaimantUserId,ClaimDate,ProofOfOwnership,Status")] ClaimRequest claimRequest)
+        [Authorize]
+        public async Task<IActionResult> Create([Bind("FoundItemId,ProofOfOwnership")] ClaimRequest claimRequest)
         {
+            // Auto-populate ClaimantUserId, ClaimDate, and Status on the server
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (int.TryParse(userIdStr, out int userId))
+            {
+                claimRequest.ClaimantUserId = userId;
+            }
+
+            claimRequest.ClaimDate = DateTime.Now;
+            claimRequest.Status = "Pending";
+
+            // Remove validation errors for fields set automatically on the server
+            ModelState.Remove(nameof(ClaimRequest.ClaimDate));
+
             if (ModelState.IsValid)
             {
                 _context.Add(claimRequest);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            await PopulateFoundItemsDropDown(claimRequest.FoundItemId);
             return View(claimRequest);
         }
 
         // GET: ClaimRequests/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -82,10 +108,9 @@ namespace ReFound.Controllers
         }
 
         // POST: ClaimRequests/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,FoundItemId,ClaimantUserId,ClaimDate,ProofOfOwnership,Status")] ClaimRequest claimRequest)
         {
             if (id != claimRequest.Id)
@@ -117,6 +142,7 @@ namespace ReFound.Controllers
         }
 
         // GET: ClaimRequests/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -137,6 +163,7 @@ namespace ReFound.Controllers
         // POST: ClaimRequests/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var claimRequest = await _context.ClaimRequests.FindAsync(id);
@@ -152,6 +179,20 @@ namespace ReFound.Controllers
         private bool ClaimRequestExists(int id)
         {
             return _context.ClaimRequests.Any(e => e.Id == id);
+        }
+
+        private async Task PopulateFoundItemsDropDown(int? selectedId = null)
+        {
+            var unclaimedItems = await _context.FoundItems
+                .Where(f => f.Status == "Unclaimed" || f.Id == selectedId)
+                .Select(f => new
+                {
+                    f.Id,
+                    DisplayText = $"{f.ItemName} ({f.LocationFound})"
+                })
+                .ToListAsync();
+
+            ViewBag.FoundItems = new SelectList(unclaimedItems, "Id", "DisplayText", selectedId);
         }
     }
 }

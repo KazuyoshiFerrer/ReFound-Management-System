@@ -1,68 +1,71 @@
 @model IEnumerable<ReFound.Models.LostItemReport>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Lost Item Reports";
 }
 
-<h1>Index</h1>
+<h1>Lost Item Reports</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+@if (User.Identity != null && User.Identity.IsAuthenticated)
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Report Lost Item</a>
+    </p>
+}
 
 <!-- Live Search input box right above the table -->
 <input type="text" id="searchBox" class="form-control mb-3"
-       placeholder="Live search - Aryan" />
+       placeholder="Search lost items by title, description, or location..." />
 
-<table class="table">
+<table class="table table-hover align-middle">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Location)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DateLost)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ContactInfo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th></th>
+            <th>Photo</th>
+            <th>@Html.DisplayNameFor(model => model.Title)</th>
+            <th>@Html.DisplayNameFor(model => model.Description)</th>
+            <th>@Html.DisplayNameFor(model => model.Location)</th>
+            <th>@Html.DisplayNameFor(model => model.DateLost)</th>
+            <th>@Html.DisplayNameFor(model => model.ContactInfo)</th>
+            <th>@Html.DisplayNameFor(model => model.Status)</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody id="reportRows">
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Title)
+                @if (!string.IsNullOrEmpty(item.ImagePath))
+                {
+                    <img src="@item.ImagePath" alt="@item.Title" class="img-thumbnail" style="max-height: 60px; max-width: 60px; object-fit: cover;" />
+                }
+                else
+                {
+                    <span class="text-body-secondary small">No photo</span>
+                }
+            </td>
+            <td>@Html.DisplayFor(modelItem => item.Title)</td>
+            <td>@Html.DisplayFor(modelItem => item.Description)</td>
+            <td>@Html.DisplayFor(modelItem => item.Location)</td>
+            <td>@Html.DisplayFor(modelItem => item.DateLost)</td>
+            <td>@Html.DisplayFor(modelItem => item.ContactInfo)</td>
+            <td>
+                @if (item.Status == "Found" || item.Status == "Resolved")
+                {
+                    <span class="badge bg-success">@item.Status</span>
+                }
+                else
+                {
+                    <span class="badge bg-warning text-dark">@item.Status</span>
+                }
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Location)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DateLost)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ContactInfo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Details</a>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                }
             </td>
         </tr>
 }
@@ -75,10 +78,10 @@
         const text = this.value.toLowerCase();
 
         document.querySelectorAll("#reportRows tr").forEach(function (row) {
-            // Checks Title (cell 0), Description (cell 1), and Location (cell 2)
-            const rowText = (row.cells[0].textContent + " " +
-                             row.cells[1].textContent + " " +
-                             row.cells[2].textContent).toLowerCase();
+            // Checks Title (cell 1), Description (cell 2), and Location (cell 3)
+            const rowText = (row.cells[1].textContent + " " +
+                             row.cells[2].textContent + " " +
+                             row.cells[3].textContent).toLowerCase();
 
             row.style.display = rowText.includes(text) ? "" : "none";
         });
